@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, BarChart3, Bookmark, Check, ChevronRight,
-  BriefcaseBusiness, Building2, CircleHelp, Database, ExternalLink, Layers3, LayoutDashboard, Loader2, Search, Settings2, ShieldCheck,
+  BriefcaseBusiness, Building2, CircleHelp, Database, ExternalLink, Layers3, LayoutDashboard, Loader2, Menu, Search, Settings2, ShieldCheck,
   SlidersHorizontal, Sparkles, TrendingUp, X } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api, dateLabel, fmt } from "@/lib/api";
@@ -36,11 +36,20 @@ export function ResearchApp() {
   const [debounced, setDebounced] = useState("");
   const [category, setCategory] = useState("");
   const [metric, setMetric] = useState<Metric | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const client = useQueryClient();
 
   useEffect(() => { try { setPrefs(dashboardStorage.load()); } catch { setStorageError("Browser storage could not be read. Changes will stay in this session unless storage becomes available."); } setReady(true); }, []);
   useEffect(() => { const timer = setTimeout(() => setDebounced(query.trim()), 400); return () => clearTimeout(timer); }, [query]);
   useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(""), 3500); return () => clearTimeout(timer); }, [notice]);
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setMobileMenuOpen(false); };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", closeOnEscape);
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener("keydown", closeOnEscape); };
+  }, [mobileMenuOpen]);
   function save(next: Preferences) {
     setPrefs(next);
     try { dashboardStorage.save(next); setStorageError(""); } catch { setStorageError("Your browser could not save this change. It is available for this session only."); }
@@ -51,7 +60,7 @@ export function ResearchApp() {
     save({ ...prefs, funds: exists ? prefs.funds.filter(f => f !== id) : [...prefs.funds, id] });
     setNotice(exists ? "Fund removed from your watchlist" : "Fund added to your watchlist");
   }
-  function navigate(next: Tab) { setTab(next); setSelected(null); }
+  function navigate(next: Tab) { setTab(next); setSelected(null); setMobileMenuOpen(false); }
   const sources = useQuery({ queryKey: ["sources"], queryFn: () => api<SourceStatus[]>("source-status"), refetchInterval: 30_000 });
   const search = useQuery({
     queryKey: ["search", debounced, prefs.directOnly, prefs.growthOnly, category],
@@ -67,14 +76,15 @@ export function ResearchApp() {
     { id: "sources" as Tab, text: "Data sources", icon: Database }, { id: "settings" as Tab, text: "My preferences", icon: Settings2 }];
 
   return <div className="app-shell">
-    <aside className="sidebar">
-      <button className="brand" onClick={() => navigate("search")} aria-label="FundLens home"><span className="brand-mark"><Layers3 size={24} /></span>FundLens<span className="brand-dot">.</span></button>
+    <aside id="main-navigation" className={`sidebar ${mobileMenuOpen ? "mobile-open" : ""}`}>
+      <div className="sidebar-head"><button className="brand" onClick={() => navigate("search")} aria-label="FundLens home"><span className="brand-mark"><Layers3 size={24} /></span>FundLens<span className="brand-dot">.</span></button><button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation"><X size={21} /></button></div>
       <div className="workspace-label">YOUR RESEARCH SPACE</div>
       <nav aria-label="Main navigation">{nav.map(({ id, text, icon: Icon }) => <button key={id} onClick={() => navigate(id)} className={`nav-item ${tab === id ? "active" : ""}`} aria-current={tab === id ? "page" : undefined}><Icon size={19} />{text}{id === "dashboard" && <span className="nav-count">{prefs.funds.length}</span>}</button>)}</nav>
       <div className="sidebar-bottom"><div className="local-note"><ShieldCheck size={22} /><strong>Your research, your space.</strong><p>Your watchlist is saved in this browser. No account needed.</p></div><div className="profile"><div className="avatar">Y</div><div><strong>Personal workspace</strong><span>Local to this browser</span></div></div></div>
     </aside>
+    <button className={`mobile-menu-backdrop ${mobileMenuOpen ? "visible" : ""}`} onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation" tabIndex={mobileMenuOpen ? 0 : -1} />
     <div className="main-shell">
-      <header className="topbar"><div className="breadcrumb">Workspace <ChevronRight size={14} /><strong>{selected ? "Fund analysis" : nav.find(n => n.id === tab)?.text}</strong></div><div className="topbar-right"><span className="market-label">INDIA <span>·</span> INR</span><span className="beta-badge">EARLY ACCESS</span><span className="avatar small">Y</span></div></header>
+      <header className="topbar"><div className="topbar-leading"><button className="mobile-menu-button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation" aria-expanded={mobileMenuOpen} aria-controls="main-navigation"><Menu size={22} /></button><div className="breadcrumb">Workspace <ChevronRight size={14} /><strong>{selected ? "Fund analysis" : nav.find(n => n.id === tab)?.text}</strong></div></div><div className="topbar-right"><span className="market-label">INDIA <span>·</span> INR</span><span className="beta-badge">EARLY ACCESS</span><span className="avatar small">Y</span></div></header>
       <main>
         {storageError && <div className="alert" role="alert">{storageError}</div>}
         {selected ? <FundAnalysis id={selected} rules={prefs.rules} saved={prefs.funds.includes(selected)} onToggle={() => toggle(selected)} onBack={() => setSelected(null)} onMetric={setMetric} /> : <>
