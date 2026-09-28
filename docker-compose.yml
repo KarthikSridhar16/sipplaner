@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      APP_ENV: production
+      ALLOWED_ORIGINS: http://localhost:3000
+      HTTP_TIMEOUT: 20
+      AMFI_ENABLED: "true"
+      ADVISORKHOJ_ENABLED: "true"
+    ports:
+      - "8000:8000"
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        API_BASE_URL: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"

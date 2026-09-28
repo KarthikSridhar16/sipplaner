@@ -1,0 +1,6 @@
+Scheme Code;ISIN Div Payout/ ISIN Growth;ISIN Div Reinvestment;Scheme Name;Net Asset Value;Date
+
+Open Ended Schemes(Equity Scheme - Mid Cap Fund)
+
+HDFC Mutual Fund
+118989;INF179K01XQ0;-;HDFC Mid Cap Fund - Direct Plan - Growth Option;231.413;18-Sep-2026

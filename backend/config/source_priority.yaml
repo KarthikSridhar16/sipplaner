@@ -1,0 +1,5 @@
+nav: [amfi, coin, advisorkhoj]
+risk_metrics: [advisorkhoj]
+expense_ratio: [groww, coin, advisorkhoj]
+aum: [groww, coin, advisorkhoj]
+portfolio: [groww]

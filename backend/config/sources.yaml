@@ -1,0 +1,29 @@
+sources:
+  amfi:
+    enabled: true
+    ttl_seconds: 1800
+    interval_seconds: 1
+  advisorkhoj:
+    enabled: true
+    ttl_seconds: 21600
+    interval_seconds: 1
+  groww:
+    enabled: true
+    ttl_seconds: 43200
+    interval_seconds: 1
+  coin:
+    enabled: true
+    ttl_seconds: 43200
+    interval_seconds: 1
+  nifty:
+    enabled: true
+    ttl_seconds: 21600
+    interval_seconds: 0.25
+  mfapi:
+    enabled: true
+    ttl_seconds: 21600
+    interval_seconds: 0.25
+  nse_ipo:
+    enabled: true
+    ttl_seconds: 300
+    interval_seconds: 0.5

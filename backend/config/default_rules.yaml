@@ -1,0 +1,9 @@
+beta_max: 1.0
+expense_ratio_max: 1.0
+upside_capture_min: 100.0
+downside_capture_max: 100.0
+category_rules:
+  small_cap:
+    beta_max: 1.1
+  index:
+    expense_ratio_max: 0.3
